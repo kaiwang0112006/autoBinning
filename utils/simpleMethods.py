@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np 
 import pandas as pd
+import math
 
 class simpleMethods:
     def __init__(self,x):
@@ -58,3 +59,19 @@ class simpleMethods:
 
         self.bins = np.array(self.bins)
         return self
+
+    def _cal_woe(self,v,bad=1):
+        '''
+        计算woe
+        :param v:
+        :param bad:
+        :return:
+        '''
+        bad_num = len(v[v == bad])
+        count_num = len(v)
+
+        if count_num-bad_num == 0 or self.allgood==0:
+            woe = 0
+        else:
+            woe = math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
+        return woe

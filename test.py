@@ -62,7 +62,7 @@ def woe_test_by_data():
 
 def main():
     woe_test_by_data()
-    #sampleTest()
+    sampleTest()
 
 if __name__ == "__main__":
     main()

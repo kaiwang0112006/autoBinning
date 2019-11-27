@@ -19,6 +19,8 @@
 
 ####  基于最大woe分裂分箱
 
+按照等距等频分箱（每个分箱样本量相同）得到潜在切分点，计算每个切分点上下的woe，寻找最大的woe变化切分点，
+
     df = pd.read_csv('credit_old.csv')
     df = df[['Age','target']]
     df = df.dropna()
@@ -28,3 +30,5 @@
     print(t.bins) # [16. 25. 42. 50. 52. 54. 63. 67. 72. 94.]
     t.fit(trend='up', num_split=4)
     print(t.bins) # [16. 25. 29. 33. 36. 94.]
+    
+

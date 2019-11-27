@@ -77,22 +77,6 @@ class splitBywoe(simpleMethods):
                 cuts.append(cut)
         return cuts
 
-    def __cal_woe(self,v,bad=1):
-        '''
-        计算woe
-        :param v:
-        :param bad:
-        :return:
-        '''
-        bad_num = len(v[v == bad])
-        count_num = len(v)
-
-        if count_num-bad_num == 0 or self.allgood==0:
-            woe = 0
-        else:
-            woe = math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
-        return woe
-
     def __find_cut(self,candidate_ind,point_ind=[],bad=1,trend='up',minwoe=0):
         result_cut = None
         result_woe = None
@@ -124,8 +108,8 @@ class splitBywoe(simpleMethods):
             v_down = self.value[(self.x<candidate_pair[i][2]) & (self.x>=candidate_pair[i][1])]
 
 
-            woe_up = self.__cal_woe(v_up,bad=bad)
-            woe_down = self.__cal_woe(v_down, bad=bad)
+            woe_up = self._cal_woe(v_up,bad=bad)
+            woe_down = self._cal_woe(v_down, bad=bad)
             if trend == 'up':
                 woe_sub = woe_up - woe_down
             elif trend == 'down':
