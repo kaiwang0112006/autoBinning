@@ -17,7 +17,7 @@
     
 ## 基于标签的有监督自动分箱
 
-####  基于最大woe分裂分箱
+####  基于最大woe分裂分箱 (splitBywoe)
 
 按照等距等频分箱（每个分箱样本量相同）得到潜在切分点，计算每个切分点上下的woe，寻找最大的woe变化切分点，
 
@@ -30,5 +30,10 @@
     print(t.bins) # [16. 25. 42. 50. 52. 54. 63. 67. 72. 94.]
     t.fit(trend='up', num_split=4)
     print(t.bins) # [16. 25. 29. 33. 36. 94.]
+    
+<p align="center">
+  <img src="https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe1.JPG" alt="woe1"/>
+  <img src="https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe2.JPG" alt="woe2"/>
+</p>
     
 
