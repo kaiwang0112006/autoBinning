@@ -67,16 +67,16 @@ def iv_test_by_data():
     df = df.dropna()
 
     t = splitByiv(df['Age'], df['target'])
-    #t.fit(miniv=0.12)
+    t.fit(miniv=0.1)
     #print(df['Age'].describe())
     #print(t.bins)
-    t.fit(num_split=4)
+    #t.fit(num_split=4)
     print(t.bins)
 
 def main():
-    woe_test_by_data()
+    #woe_test_by_data()
     #sampleTest()
-    #iv_test_by_data()
+    iv_test_by_data()
 
 if __name__ == "__main__":
     main()
