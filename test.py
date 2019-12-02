@@ -3,6 +3,7 @@
 from utils.simpleMethods import *
 from utils.trendDiscretization import *
 from utils.splitBywoe import *
+from utils.splitByiv import *
 import numpy as np
 import pandas as pd
 
@@ -51,18 +52,31 @@ def woe_test_by_data():
     df = df.dropna()
 
     t = splitBywoe(df['Age'], df['target'])
-    t.fit(trend='up',minwoe=0.11)
+    t.fit(trend='up',init_split=20,minwoe=0.01)
     #print(df['Age'].describe())
     print(t.bins)
-    t.fit(trend='up', num_split=4)
-    print(t.bins)
+    #t.fit(trend='up', num_split=4)
+    #print(t.bins)
     #trans = np.digitize(df['Age'], t.bins)
     #print(list(trans))
     #print(df['Age'])
 
+def iv_test_by_data():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Age','target']]
+    df = df.dropna()
+
+    t = splitByiv(df['Age'], df['target'])
+    #t.fit(miniv=0.12)
+    #print(df['Age'].describe())
+    #print(t.bins)
+    t.fit(num_split=4)
+    print(t.bins)
+
 def main():
     woe_test_by_data()
-    sampleTest()
+    #sampleTest()
+    #iv_test_by_data()
 
 if __name__ == "__main__":
     main()
