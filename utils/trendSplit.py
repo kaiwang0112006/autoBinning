@@ -11,14 +11,14 @@ class trendSplit(simpleMethods):
         self.y = y
         self.cut_range = []
 
-    def fit(self, bad=1, init_split=0, trend='up', num_split=None, minv=None, by='woe'):
+    def fit(self, bad=1, init_split=0, trend='up', num_split=None, minv=None, sby='woe'):
         '''
         :param bad: 坏样本标记，默认label=1为坏样本
         :param trend: 趋势参数，up为woe递增，down为woe递减，默认为None，不考虑趋势，
                       取woe最大的切分点，只对woe有效
         :param num_split: 最大切割点数,不包含最大最小值
         :param minv: 最小分裂所需数值，woe/iv
-        :param by: 'woe','iv'
+        :param sby: 'woe','iv'
         :return: numpy array -- 切割点数组
         '''
         self.value = np.array(self.y)
@@ -35,12 +35,20 @@ class trendSplit(simpleMethods):
             candidate.append(r[0])
             candidate.append(r[1])
         self.candidate = sorted(list(set(candidate)))
-        cut = self.find_cut(bad=bad, trend=trend, minwoe=minwoe)
+        if sby == 'woe':
+            find_cut = self.find_cut_woe
+            param = {'bad':bad, 'trend':trend, 'minwoe':minv}
+        elif sby == 'iv':
+            find_cut = self.find_cut_iv
+            param = {'bad': bad, 'miniv':minv}
+        else:
+            raise NameError("Unsupport type of sby")
+        cut = find_cut(**param)
         self.cut_range = [cut]
 
         if cut:
             while True:
-                cut = self.find_cut(bad=bad, trend=trend, minwoe=minwoe)
+                cut = find_cut(**param)
                 if cut:
                     self.cut_range.append(cut)
                     self.cut_range = sorted(list(set(self.cut_range)))
@@ -116,7 +124,7 @@ class trendSplit(simpleMethods):
 
         return result_cut
 
-    def find_cut(self,bad=1,miniv=None):
+    def find_cut_iv(self,bad=1,miniv=None):
         '''
         基于最大iv分裂切割
         :param bad: 坏样本标记，默认label=1为坏样本
@@ -125,6 +133,7 @@ class trendSplit(simpleMethods):
         '''
         if not miniv:
             miniv=0
+
         cut_find = None
         iv = 0
         if len(self.cut_range) == 0:
@@ -154,7 +163,9 @@ class trendSplit(simpleMethods):
                             vvalue = self.value[(self.x < cut_points[j+1]) & (self.x >= cut_points[j])]
                         iv_up = self._cal_iv(vvalue,bad=bad)
                         iv_split += iv_up
-                        if iv_split>=miniv and iv_split>iv:
+                        if iv_split>=miniv and iv_split>iv and iv_split>self.iv_base:
                             iv = iv_split
                             cut_find = self.candidate[i]
+        self.iv_base = iv
+
         return cut_find

@@ -10,7 +10,7 @@ class splitByiv(simpleMethods):
         self.y = y
         self.cut_range = []
             
-    def fit(self, bad=1,init_split=20,num_split=None, miniv=None):
+    def fit(self, bad=1,init_split=0,num_split=None, miniv=None):
         '''
         :param bad: 坏样本标记，默认label=1为坏样本
         :param init_split: 基于等频分箱确认初始分裂点, init_split=0时使用最细粒度
@@ -99,5 +99,5 @@ class splitByiv(simpleMethods):
                             iv = iv_split
                             cut_find = self.candidate[i]
         self.iv_base = iv
-        print(self.iv_base)
+
         return cut_find

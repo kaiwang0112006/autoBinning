@@ -2,6 +2,7 @@
 
 from utils.simpleMethods import *
 from utils.trendDiscretization import *
+from utils.trendSplit import *
 from utils.splitBywoe import *
 from utils.splitByiv import *
 import numpy as np
@@ -68,9 +69,9 @@ def iv_test_by_data():
 
     t = splitByiv(df['Age'], df['target'])
     t.fit(miniv=0.1)
-    #print(df['Age'].describe())
-    #print(t.bins)
-    #t.fit(num_split=4)
+    print(t.bins)
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='iv',minv=0.1,init_split=20)
     print(t.bins)
 
 def main():
