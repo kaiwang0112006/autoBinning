@@ -35,10 +35,8 @@
     t.fit(sby='woe',num_split=4,init_split=20,trend='up')
     print(t.bins) # [16. 25. 42. 50. 72. 94.]
 
-<p align="center">
-  <img src="https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe1.JPG" alt="woe1"/>
-  <img src="https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe2.JPG" alt="woe2"/>
-</p>
+![avatar](https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe1.JPG)
+![avatar](https://raw.githubusercontent.com/kaiwang0112006/clusfps/master/guild.png)
 
 #### 基于最大iv分裂分箱
 
