@@ -56,8 +56,12 @@ def woe_test_by_data():
     t.fit(trend='up',init_split=20,minwoe=0.01)
     #print(df['Age'].describe())
     print(t.bins)
-    #t.fit(trend='up', num_split=4)
-    #print(t.bins)
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='woe',minv=0.01,init_split=20,trend='up')
+    print(t.bins)
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='woe',num_split=4,init_split=20,trend='up')
+    print(t.bins)
     #trans = np.digitize(df['Age'], t.bins)
     #print(list(trans))
     #print(df['Age'])
@@ -69,10 +73,16 @@ def iv_test_by_data():
 
     t = splitByiv(df['Age'], df['target'])
     t.fit(miniv=0.1)
-    print(t.bins)
+    print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='iv',minv=0.1)
+    print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
     t = trendSplit(df['Age'], df['target'])
     t.fit(sby='iv',minv=0.1,init_split=20)
-    print(t.bins)
+    print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 46. 48. 50. 94.]
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='iv',num_split=4,init_split=20)
+    print(t.bins) # [16. 25. 29. 33. 42. 94.]
 
 def main():
     #woe_test_by_data()

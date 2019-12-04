@@ -17,7 +17,7 @@
     
 ## 基于标签的有监督自动分箱
 
-####  基于最大woe分裂分箱 (splitBywoe)
+#### 基于最大woe分裂分箱 
 
 按照等距等频分箱（每个分箱样本量相同）得到潜在切分点，计算每个切分点上下的woe，寻找最大的woe变化切分点，
 
@@ -25,15 +25,35 @@
     df = df[['Age','target']]
     df = df.dropna()
 
-    t = splitBywoe(df['Age'], df['target'])
-    t.fit(trend='up',minwoe=0.11)
-    print(t.bins) # [16. 25. 42. 50. 52. 54. 63. 67. 72. 94.]
-    t.fit(trend='up', num_split=4)
-    print(t.bins) # [16. 25. 29. 33. 36. 94.]
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='woe',minv=0.01,init_split=20,trend='up')
+    print(t.bins) # [16. 25. 42. 50. 63. 72. 94.]
+    t.fit(sby='woe',num_split=4,init_split=20,trend='up')
+    print(t.bins) # [16. 25. 42. 50. 72. 94.]
     
 <p align="center">
   <img src="https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe1.JPG" alt="woe1"/>
   <img src="https://github.com/kaiwang0112006/autoBinning/blob/master/doc/woe2.JPG" alt="woe2"/>
 </p>
+
+#### 基于最大iv分裂分箱
+
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Age','target']]
+    df = df.dropna()
+
+    t = splitByiv(df['Age'], df['target'])
+    t.fit(miniv=0.1)
+    print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='iv',minv=0.1)
+    print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='iv',minv=0.1,init_split=20)
+    print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 46. 48. 50. 94.]
+    t = trendSplit(df['Age'], df['target'])
+    t.fit(sby='iv',num_split=4,init_split=20)
+    print(t.bins) # [16. 25. 29. 33. 42. 94.]
+
     
 
