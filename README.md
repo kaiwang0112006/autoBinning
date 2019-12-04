@@ -44,9 +44,6 @@
     df = df[['Age','target']]
     df = df.dropna()
 
-    t = splitByiv(df['Age'], df['target'])
-    t.fit(miniv=0.1)
-    print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
     t = trendSplit(df['Age'], df['target'])
     t.fit(sby='iv',minv=0.1)
     print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
