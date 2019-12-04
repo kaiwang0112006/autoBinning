@@ -52,10 +52,6 @@ def woe_test_by_data():
     df = df[['Age','target']]
     df = df.dropna()
 
-    t = splitBywoe(df['Age'], df['target'])
-    t.fit(trend='up',init_split=20,minwoe=0.01)
-    #print(df['Age'].describe())
-    print(t.bins)
     t = trendSplit(df['Age'], df['target'])
     t.fit(sby='woe',minv=0.01,init_split=20,trend='up')
     print(t.bins)
@@ -71,9 +67,6 @@ def iv_test_by_data():
     df = df[['Age','target']]
     df = df.dropna()
 
-    t = splitByiv(df['Age'], df['target'])
-    t.fit(miniv=0.1)
-    print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
     t = trendSplit(df['Age'], df['target'])
     t.fit(sby='iv',minv=0.1)
     print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
