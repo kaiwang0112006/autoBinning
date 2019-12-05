@@ -163,9 +163,9 @@ class trendSplit(simpleMethods):
                             vvalue = self.value[(self.x < cut_points[j+1]) & (self.x >= cut_points[j])]
                         iv_up = self._cal_iv(vvalue,bad=bad)
                         iv_split += iv_up
-                        if iv_split>=miniv and iv_split>iv and iv_split>self.iv_base:
-                            iv = iv_split
-                            cut_find = self.candidate[i]
+                    if iv_split>=miniv and iv_split>iv and iv_split>self.iv_base:
+                        iv = iv_split
+                        cut_find = self.candidate[i]
         self.iv_base = iv
 
         return cut_find
