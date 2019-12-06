@@ -65,6 +65,17 @@ class trendSplit(simpleMethods):
             self.bins = None
 
     def find_cut(self,**parms):
+        '''
+        寻找最优切点
+        :param parms:参数字典
+                      bad: 坏样本标记，默认label=1为坏样本
+                      trend: 趋势参数，up为woe递增，down为woe递减，默认为None，不考虑趋势，
+                      取woe最大的切分点，只对woe有效
+                      num_split: 最大切割点数,不包含最大最小值
+                      minv: 最小分裂所需数值，woe/iv
+                      sby: 'woe','iv','woeiv'
+        :return:
+        '''
         if parms['minv']:
             minv = parms['minv']
         else:
@@ -95,8 +106,8 @@ class trendSplit(simpleMethods):
                     minv = iv
                     cut = self.candidate[i]
             else:
-                woe = self.cal_woe_by_range(woe_range,parms['bad'])
-                iv = self.cal_iv_by_range(iv_range)
+                woe = self.cal_woe_by_range(woe_range,parms['trend'],parms['bad'])
+                iv = self.cal_iv_by_range(iv_range,parms['bad'])
                 if ((woe>=0 and parms['trend']=='up') or (woe<=0 and parms['trend']=='down') \
                     or parms['trend'] not in ('up','down')) and iv > minv:
                     minv = iv
@@ -125,6 +136,12 @@ class trendSplit(simpleMethods):
         return woe_sub
 
     def cal_iv_by_range(self,vrange,bad):
+        '''
+        根据切点范围(start, mid, end)计算iv
+        :param vrange:
+        :param bad:
+        :return:
+        '''
         iv_split = 0
         for j in range(len(vrange)-1):
             vvalue = self.value[(self.x < vrange[j+1]) & (self.x >= vrange[j])]
