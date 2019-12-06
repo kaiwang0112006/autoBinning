@@ -18,7 +18,7 @@ class trendSplit(simpleMethods):
                       取woe最大的切分点，只对woe有效
         :param num_split: 最大切割点数,不包含最大最小值
         :param minv: 最小分裂所需数值，woe/iv
-        :param sby: 'woe','iv'
+        :param sby: 'woe','iv','woeiv'
         :return: numpy array -- 切割点数组
         '''
         self.value = np.array(self.y)
@@ -35,23 +35,21 @@ class trendSplit(simpleMethods):
             candidate.append(r[0])
             candidate.append(r[1])
         self.candidate = sorted(list(set(candidate)))
-        if sby == 'woe':
-            find_cut = self.find_cut_woe
-            param = {'bad':bad, 'trend':trend, 'minwoe':minv}
-        elif sby == 'iv':
-            find_cut = self.find_cut_iv
-            param = {'bad': bad, 'miniv':minv}
-        else:
-            raise NameError("Unsupport type of sby")
-        cut = find_cut(**param)
-        self.cut_range = [cut]
 
+        param = {'bad': bad, 'trend': trend, 'minv': minv, 'sby': sby}
+        cut, woe ,iv = self.find_cut(**param)
+        param['woe'] = woe
+        param['iv'] = iv
+        self.cut_range = [cut]
+        self.candidate.remove(cut)
         if cut:
             while True:
-                cut = find_cut(**param)
+                cut, woe ,iv = self.find_cut(**param)
+                param['iv'] = iv
                 if cut:
                     self.cut_range.append(cut)
                     self.cut_range = sorted(list(set(self.cut_range)))
+                    self.candidate.remove(cut)
                 else:
                     break
 
@@ -66,106 +64,71 @@ class trendSplit(simpleMethods):
             self.cut_range = None
             self.bins = None
 
-    def find_cut_woe(self, bad=1, trend='up', minwoe=None):
-        '''
-        基于最大woe分裂切割
-        :param cut_list: 已分裂的结点
-        :param bad: 坏样本标记，默认label=1为坏样本
-        :param trend: 趋势参数，up为woe递增，down为woe递减，默认为None，不考虑趋势，取woe最大的切分点
-        :param minwoe: 最小分裂所需woe
-        :return: 新的一个最大切割点
-        '''
-        result_cut = None
-        result_woe = None
-        if not minwoe:
-            minwoe = 0
-        cut_find = None
-        # 先计算所有的范围：(start, point, end)
-        candidate_pair = []
-        if len(self.cut_range) == 0:
-            for i in range(1, len(self.candidate) - 1):
-                candidate_pair.append((self.candidate[0], self.candidate[i], self.candidate[-1] + 1))
+    def find_cut(self,**parms):
+        if parms['minv']:
+            minv = parms['minv']
         else:
-            pidx = 0
-            cut_range = sorted(self.cut_range)
-            for i in range(1, len(self.candidate) - 1):
-                if self.candidate[i] not in cut_range:
-                    if pidx <= len(cut_range) - 1:
-                        if self.candidate[i] > cut_range[pidx]:
-                            pidx += 1
-                    start = self.candidate[0] if pidx == 0 else cut_range[pidx - 1]
-                    end = self.candidate[-1] if pidx == len(cut_range) else cut_range[pidx]
-                    candidate_pair.append((start, self.candidate[i], end))
-
-        # 计算woe最大的point
-        # print(candidate_pair)
-        compare_woe = {}
-        for i in range(len(candidate_pair)):
-            v_up = self.value[(self.x < candidate_pair[i][1]) & (self.x >= candidate_pair[i][0])]
-            v_down = self.value[(self.x < candidate_pair[i][2]) & (self.x >= candidate_pair[i][1])]
-
-            woe_up = self._cal_woe(v_up, bad=bad)
-            woe_down = self._cal_woe(v_down, bad=bad)
-            if trend == 'up':
-                woe_sub = woe_up - woe_down
-            elif trend == 'down':
-                woe_sub = woe_down - woe_up
+            minv = 0
+        woe = 0
+        iv_base = parms.get("iv", minv)
+        cut = None
+        result = {}
+        for i in range(1, len(self.candidate) - 1):
+            if len(self.cut_range) == 0:
+                woe_range = (self.candidate[0], self.candidate[i], self.candidate[-1]+1)
+                iv_range = (self.candidate[0], self.candidate[i], self.candidate[-1]+1)
             else:
-                woe_sub = abs(woe_down - woe_up)
+                range_list = sorted([self.candidate[0], self.candidate[i], self.candidate[-1]+1]+list(self.cut_range))
+                canidx = range_list.index(self.candidate[i])
+                woe_range = (self.candidate[0], self.candidate[i], self.candidate[-1]+1)
+                iv_range = tuple(range_list)
 
-            if woe_sub - minwoe > 0:
-                compare_woe[candidate_pair[i][1]] = woe_sub
-                if not result_woe:
-                    result_woe = woe_sub
-                    result_cut = candidate_pair[i][1]
-                elif woe_sub > result_woe and candidate_pair[i][1] not in self.cut_range:
-                    result_woe = woe_sub
-                    result_cut = candidate_pair[i][1]
+            if parms['sby'] == 'woe':
+                woe = self.cal_woe_by_range(woe_range, parms['trend'],parms['bad'])
+                if woe > minv:
+                    minv = woe
+                    cut = self.candidate[i]
+            elif parms['sby'] == 'iv':
+                iv = self.cal_iv_by_range(iv_range,parms['bad'])
+                result[self.candidate[i]] = iv
+                if iv > minv and iv>iv_base:
+                    minv = iv
+                    cut = self.candidate[i]
+            else:
+                woe = self.cal_woe_by_range(woe_range,parms['bad'])
+                iv = self.cal_iv_by_range(iv_range)
+                if ((woe>=0 and parms['trend']=='up') or (woe<=0 and parms['trend']=='down') \
+                    or parms['trend'] not in ('up','down')) and iv > minv:
+                    minv = iv
+                    cut = self.candidate[i]
 
-        return result_cut
+        return cut, woe, iv
 
-    def find_cut_iv(self,bad=1,miniv=None):
+    def cal_woe_by_range(self,wrange,trend,bad):
         '''
-        基于最大iv分裂切割
-        :param bad: 坏样本标记，默认label=1为坏样本
-        :param miniv: 最小分裂所需miniv
-        :return: 新的一个最大切割点
+        根据切点范围(start, mid, end)计算woe
+        :param wrange:
+        :param trend:
+        :return:
         '''
-        if not miniv:
-            miniv=0
+        v_up = self.value[(self.x < wrange[1]) & (self.x >= wrange[0])]
+        v_down = self.value[(self.x < wrange[2]) & (self.x >= wrange[1])]
 
-        cut_find = None
-        iv = 0
-        if len(self.cut_range) == 0:
-            for i in range(1,len(self.candidate)-1):
-                v_up = self.value[(self.x < self.candidate[i])]
-                v_down = self.value[(self.x >= self.candidate[i])]
-
-                iv_up = self._cal_iv(v_up,bad=bad)
-                iv_down = self._cal_iv(v_down, bad=bad)
-                iv_split = iv_down + iv_up
-                if iv_split>=miniv and iv_split>iv:
-                    iv = iv_split
-                    cut_find = self.candidate[i]
+        woe_up = self._cal_woe(v_up, bad=bad)
+        woe_down = self._cal_woe(v_down, bad=bad)
+        if trend == 'up':
+            woe_sub = woe_up - woe_down
+        elif trend == 'down':
+            woe_sub = woe_down - woe_up
         else:
-            for i in range(1, len(self.candidate) - 1):
-                if self.candidate[i] not in self.cut_range:
-                    cut_points = copy.deepcopy(self.cut_range)
-                    cut_points.append(self.candidate[i])
-                    cut_points = sorted(list(set(cut_points)))
-                    iv_split = 0
-                    for j in range(len(cut_points)):
-                        if j == 0:
-                            vvalue = self.value[(self.x < cut_points[j])]
-                        elif j == len(cut_points)-1:
-                            vvalue = self.value[(self.x >= cut_points[j])]
-                        else:
-                            vvalue = self.value[(self.x < cut_points[j+1]) & (self.x >= cut_points[j])]
-                        iv_up = self._cal_iv(vvalue,bad=bad)
-                        iv_split += iv_up
-                    if iv_split>=miniv and iv_split>iv and iv_split>self.iv_base:
-                        iv = iv_split
-                        cut_find = self.candidate[i]
-        self.iv_base = iv
+            woe_sub = abs(woe_down - woe_up)
+        return woe_sub
 
-        return cut_find
+    def cal_iv_by_range(self,vrange,bad):
+        iv_split = 0
+        for j in range(len(vrange)-1):
+            vvalue = self.value[(self.x < vrange[j+1]) & (self.x >= vrange[j])]
+            iv_box = self._cal_iv(vvalue, bad=bad)
+            iv_split += iv_box
+        return iv_split
+
