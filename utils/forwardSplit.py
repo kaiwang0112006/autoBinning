@@ -30,16 +30,14 @@ class forwardSplit(trendSplit):
         self.candidate = sorted(list(set(candidate)))
 
         param = {'minv': minv, 'sby': sby}
-        cut, woe ,iv = self.find_cut(**param)
-        param['woe'] = woe
-        param['iv'] = iv
+        cut, iv = self.find_cut(**param)
+        param['iv_base'] = iv
         self.cut_range = [cut]
         self.candidate.remove(cut)
         if cut:
             while True:
-                cut, woe ,iv = self.find_cut(**param)
-                param['woe'] = woe
-                param['iv'] = iv
+                cut, iv = self.find_cut(**param)
+                param['iv_base'] = iv
                 if cut:
                     self.cut_range.append(cut)
                     self.cut_range = sorted(list(set(self.cut_range)))
@@ -59,27 +57,23 @@ class forwardSplit(trendSplit):
             self.bins = None
 
 
-    def find_cut(self,**parms):
+    def find_cut(self,minv=None, sby='iv',iv_base=None):
         '''
         寻找最优切点
         :param parms:参数字典
-                      bad: 坏样本标记，默认label=1为坏样本
-                      trend: 趋势参数，up为woe递增，down为woe递减，默认为None，不考虑趋势，
-                      取woe最大的切分点，只对woe有效
-                      num_split: 最大切割点数,不包含最大最小值
                       minv: 最小分裂所需数值，woe/iv
                       sby: 'woe','iv','woeiv'
+                      iv_base: 上一轮的iv值，sby='woe'时不用考虑
         :return:
         '''
-        if parms['minv']:
-            minv = parms['minv']
-        else:
+        if not minv:
             minv = 0
-        if ((parms['sby'] == 'woe') or (parms['sby'] == 'woeiv')) and (not self.trend):
+        if ((sby== 'woe') or (sby == 'woeiv')) and (not self.trend):
             self.trend = self.candidateTrend()
-        woe = 0
+
         iv = 0
-        iv_base = parms.get("iv", minv)
+        if not iv_base:
+            iv_base = 0
         cut = None
         result = {}
         for i in range(1, len(self.candidate) - 1):
@@ -93,15 +87,15 @@ class forwardSplit(trendSplit):
                 woe_range = (range_list[canidx-1], range_list[canidx], range_list[canidx+1])
                 iv_range = tuple(range_list)
 
-            if parms['sby'] == 'woe':
+            if sby == 'woe':
                 woe = self.cal_woe_by_range(woe_range)
                 if woe > minv:
                     minv = woe
                     cut = self.candidate[i]
-            elif parms['sby'] == 'iv':
+            elif sby == 'iv':
                 iv = self.cal_iv_by_range(iv_range)
                 result[self.candidate[i]] = iv
-                if iv > minv and iv>iv_base:
+                if iv > minv and iv > iv_base:
                     minv = iv
                     cut = self.candidate[i]
             else:
@@ -112,4 +106,4 @@ class forwardSplit(trendSplit):
                     minv = iv
                     cut = self.candidate[i]
 
-        return cut, woe, iv
+        return cut, iv
