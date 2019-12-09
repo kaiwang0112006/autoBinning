@@ -83,36 +83,3 @@ class simpleMethods:
             end = self.bins[i+1]+1 if i+1==len(self.bins) else self.bins[i+1]
 
             self.range_dict[(start, end)] = i
-
-
-    def _cal_woe(self,v):
-        '''
-        计算woe
-        :param v:
-        :param bad:
-        :return:
-        '''
-        bad_num = len(v[v == self.bad])
-        count_num = len(v)
-
-        if count_num-bad_num == 0 or self.allgood==0:
-            woe = 0
-        else:
-            woe = math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
-        return woe
-
-    def _cal_iv(self, v):
-        '''
-        计算iv
-        :param v:
-        :param bad:
-        :return:
-        '''
-        bad_num = len(v[v == self.bad])
-        count_num = len(v)
-
-        if count_num-bad_num == 0 or self.allgood==0:
-            iv = 0
-        else:
-            iv = (bad_num / (count_num - bad_num))*math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
-        return iv
