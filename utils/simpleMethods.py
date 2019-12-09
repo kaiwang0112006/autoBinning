@@ -85,14 +85,14 @@ class simpleMethods:
             self.range_dict[(start, end)] = i
 
 
-    def _cal_woe(self,v,bad=1):
+    def _cal_woe(self,v):
         '''
         计算woe
         :param v:
         :param bad:
         :return:
         '''
-        bad_num = len(v[v == bad])
+        bad_num = len(v[v == self.bad])
         count_num = len(v)
 
         if count_num-bad_num == 0 or self.allgood==0:
@@ -101,14 +101,14 @@ class simpleMethods:
             woe = math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
         return woe
 
-    def _cal_iv(self, v, bad=1):
+    def _cal_iv(self, v):
         '''
         计算iv
         :param v:
         :param bad:
         :return:
         '''
-        bad_num = len(v[v == bad])
+        bad_num = len(v[v == self.bad])
         count_num = len(v)
 
         if count_num-bad_num == 0 or self.allgood==0:

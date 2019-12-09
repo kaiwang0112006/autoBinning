@@ -2,7 +2,7 @@
 
 from utils.simpleMethods import *
 from utils.trendDiscretization import *
-from utils.trendSplit import *
+from utils.forwardSplit import *
 import numpy as np
 import pandas as pd
 
@@ -50,12 +50,12 @@ def woe_test_by_data():
     df = df[['Age','target']]
     df = df.dropna()
 
-    t = trendSplit(df['Age'], df['target'])
-    t.fit(sby='woe',minv=0.01,init_split=20,trend='up')
-    print(t.bins)
-    t = trendSplit(df['Age'], df['target'])
-    t.fit(sby='woe',num_split=4,init_split=20,trend='up')
-    print(t.bins)
+    t = forwardSplit(df['Age'], df['target'])
+    t.fit(sby='woe',minv=0.01,init_split=20)
+    print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 44. 46. 48. 50. 52. 54. 55. 58. 60. 63. 72. 94.]
+    t = forwardSplit(df['Age'], df['target'])
+    t.fit(sby='woe',num_split=4,init_split=20)
+    print(t.bins) # [16. 42. 44. 48. 50. 94.]
     #trans = np.digitize(df['Age'], t.bins)
     #print(list(trans))
     #print(df['Age'])
@@ -65,19 +65,17 @@ def iv_test_by_data():
     df = df[['Age','target']]
     df = df.dropna()
 
-    t = trendSplit(df['Age'], df['target'])
-    #t.fit(sby='iv',minv=0.1)
-    #print(t.bins) # [16.  18.5 82.5 83.5 84.5 85.5 86.5 95. ]
+    t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='iv',minv=0.1,init_split=20)
     print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 44. 46. 48. 50. 58. 60. 63. 94.]
-    t = trendSplit(df['Age'], df['target'])
+    t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='iv',num_split=4,init_split=20)
     print(t.bins) # [16. 25. 33. 36. 38. 94.]
     t.fit(sby='woeiv',num_split=4,init_split=20)
     print(t.bins) # [16. 25. 33. 36. 38. 94.]
 
 def main():
-    #woe_test_by_data()
+    woe_test_by_data()
     #sampleTest()
     iv_test_by_data()
 
