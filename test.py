@@ -3,6 +3,7 @@
 from utils.simpleMethods import *
 from utils.trendDiscretization import *
 from utils.forwardSplit import *
+from utils.backwardSplit import *
 import numpy as np
 import pandas as pd
 
@@ -45,7 +46,7 @@ def trend_test_by_data():
     print(t.bins)
     #print(df['Age'].describe())
  
-def woe_test_by_data():
+def forward_woe_test():
     df = pd.read_csv('credit_old.csv')
     df = df[['Age','target']]
     df = df.dropna()
@@ -56,11 +57,15 @@ def woe_test_by_data():
     t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='woe',num_split=4,init_split=20)
     print(t.bins) # [16. 42. 44. 48. 50. 94.]
-    #trans = np.digitize(df['Age'], t.bins)
-    #print(list(trans))
-    #print(df['Age'])
+    woe_dict = {}
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        woe_dict[(t.bins[i], t.bins[i+1])] = woe
+    print(woe_dict)
+    # {(16.0, 25.0): 0.11373232830301286, (25.0, 42.0): 0.07217546872710079, (42.0, 50.0): 0.04972042405868509, (50.0, 72.0): -0.07172614369435065, (72.0, 94.0): -0.13778318584223453}
 
-def iv_test_by_data():
+def forward_iv_test():
     df = pd.read_csv('credit_old.csv')
     df = df[['Age','target']]
     df = df.dropna()
@@ -69,15 +74,38 @@ def iv_test_by_data():
     t.fit(sby='iv',minv=0.1,init_split=20)
     print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 44. 46. 48. 50. 58. 60. 63. 94.]
     t = forwardSplit(df['Age'], df['target'])
-    t.fit(sby='iv',num_split=4,init_split=20)
-    print(t.bins) # [16. 25. 33. 36. 38. 94.]
+    t.fit(sby='iv',num_split=4,init_split=20,min_sample=len(df)*0.2)
+    print(t.bins) # [16. 38. 50. 94.]
     t.fit(sby='woeiv',num_split=4,init_split=20)
     print(t.bins) # [16. 25. 33. 36. 38. 94.]
+    woe_dict = {}
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        woe_dict[(t.bins[i], t.bins[i+1])] = woe
+    print(woe_dict)
+
+def backward_iv_test():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Age','target']]
+    df = df.dropna()
+
+    t = backwardSplit(df['Age'], df['target'])
+    t.fit(sby='iv',num_split=5)
+    print(t.bins) # [16.  17.5 18.5 85.5 95. ]
+    woe_dict = {}
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        woe_dict[(t.bins[i], t.bins[i+1])] = woe
+    print(woe_dict)
+
 
 def main():
-    woe_test_by_data()
+    #forward_woe_test()
     #sampleTest()
-    iv_test_by_data()
+    #forward_iv_test()
+    backward_iv_test()
 
 if __name__ == "__main__":
     main()

@@ -19,6 +19,9 @@ class trendSplit(simpleMethods):
         self.allbad = len(self.value[self.value == self.bad])  # 好样本总数
         self.allgood = len(self.value) - self.allbad  # 坏样本总数
         self.candidate = []
+        self.woe_cache = {}
+        self.iv_cache = {}
+        self.know_box = {}
 
     def cal_woe_by_range(self,wrange):
         '''
@@ -27,11 +30,9 @@ class trendSplit(simpleMethods):
         :param trend:
         :return:
         '''
-        v_up = self.value[(self.x < wrange[1]) & (self.x >= wrange[0])]
-        v_down = self.value[(self.x < wrange[2]) & (self.x >= wrange[1])]
+        woe_up = self.cal_woe_by_start_end(wrange[0], wrange[1])
+        woe_down = self.cal_woe_by_start_end(wrange[1], wrange[2])
 
-        woe_up = self._cal_woe(v_up)
-        woe_down = self._cal_woe(v_down)
         if self.trend == 'up':
             woe_sub = woe_up - woe_down
         elif self.trend == 'down':
@@ -48,11 +49,27 @@ class trendSplit(simpleMethods):
         :return:
         '''
         iv_split = 0
+        result = []
         for j in range(len(vrange)-1):
-            vvalue = self.value[(self.x < vrange[j+1]) & (self.x >= vrange[j])]
-            iv_box = self._cal_iv(vvalue)
+            if (vrange[j], vrange[j+1]) not in self.iv_cache:
+                vvalue = self.value[(self.x <= vrange[j+1]) & (self.x > vrange[j])]
+                iv_box = self._cal_iv(vvalue)
+                self.iv_cache[(vrange[j], vrange[j+1])] = iv_box
+            else:
+                iv_box = self.iv_cache[(vrange[j], vrange[j+1])]
+            result.append(iv_box)
             iv_split += iv_box
+
         return iv_split
+
+    def cal_woe_by_start_end(self, start, end):
+        if (start, end) not in self.woe_cache:
+            vvalue = self.value[(self.x <= end) & (self.x > start)]
+            woe_box = self._cal_woe(vvalue)
+            self.woe_cache[(start, end)] = woe_box
+        else:
+            woe_box = self.woe_cache[(start, end)]
+        return woe_box
 
     def _cal_woe(self,v):
         '''
@@ -64,7 +81,7 @@ class trendSplit(simpleMethods):
         bad_num = len(v[v == self.bad])
         count_num = len(v)
 
-        if count_num-bad_num == 0 or self.allgood==0:
+        if count_num-bad_num==0 or self.allgood==0:
             woe = 0
         else:
             woe = math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
@@ -86,26 +103,28 @@ class trendSplit(simpleMethods):
             iv = (bad_num / (count_num - bad_num))*math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
         return iv
 
-    def candidateTrend(self):
+    def candidateTrend(self,cut_range):
+        #print(cut_range)
         trend_up = 0
         trend_down = 0
-
-        if len(self.cut_range) == 0:
+        result = {}
+        if len(cut_range) == 0:
             candidate_list = copy.deepcopy(self.candidate)
         else:
-            candidate_list = [self.candidate[0]] + copy.deepcopy(self.cut_range) + [self.candidate[-1]]
+            candidate_list = [self.candidate[0]] + copy.deepcopy(cut_range) + [self.candidate[-1]]
         for i in range(1,len(candidate_list) - 1):
-            v_up = self.value[(self.x < candidate_list[i]) & (self.x >= candidate_list[i-1])]
-            v_down = self.value[(self.x < candidate_list[i+1]) & (self.x >= candidate_list[i])]
-            woe_up = self._cal_woe(v_up)
-            woe_down = self._cal_woe(v_down)
-            iv_up = self._cal_iv(v_up)
-            iv_down = self._cal_iv(v_down)
+            woe_up = self.cal_woe_by_start_end(candidate_list[i-1], candidate_list[i])
+            woe_down = self.cal_woe_by_start_end(candidate_list[i], candidate_list[i+1])
+
             if woe_up>woe_down:
                 trend_up += 1
             elif woe_up<woe_down:
                 trend_down += 1
+            result[candidate_list[i]] = (woe_up, woe_down)
+
         if trend_up>trend_down:
             self.trend = 'up'
         elif trend_up<trend_down:
             self.trend = 'down'
+        #print(trend_up, trend_down, result)
+        return trend_up, trend_down

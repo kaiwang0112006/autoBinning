@@ -34,7 +34,7 @@ class simpleMethods:
 
         for i in range(len(self.bins)-1):
             start = self.bins[i]
-            end = self.bins[i+1]+1 if i+1==len(self.bins) else self.bins[i+1]
+            end = self.bins[i+1]
 
             self.range_dict[(start, end)] = i       
 
@@ -54,7 +54,7 @@ class simpleMethods:
 
         for i in range(len(self.bins)-1):
             start = self.bins[i]
-            end = self.bins[i+1]+1 if i+1==len(self.bins) else self.bins[i+1]
+            end = self.bins[i+1]
 
             self.range_dict[(start, end)] = i       
 
@@ -69,7 +69,6 @@ class simpleMethods:
         if type(list(self.x)[0]) == type(1):
             self.bins = np.array(list(self.x))
         else:
-            bins = []
             x_sort = sorted(self.x,reverse=False)
             bins = [x_sort[0]]
             for i in range(len(x_sort)-1):
@@ -80,6 +79,6 @@ class simpleMethods:
         self.range_dict = {}
         for i in range(len(self.bins)-1):
             start = self.bins[i]
-            end = self.bins[i+1]+1 if i+1==len(self.bins) else self.bins[i+1]
+            end = self.bins[i+1]
 
             self.range_dict[(start, end)] = i
