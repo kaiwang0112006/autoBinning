@@ -7,6 +7,7 @@ from utils.backwardSplit import *
 import numpy as np
 import pandas as pd
 
+
 def sampleTest():
     #my_list = [1,1,2,2,2,2,3,3,4,5,6,7,8,9]
     my_list = [1,1,2,2,2,2,3,3,4,5,6,7,8,9,10,10,20,20,20,20,30,30,40,50,60,70,80,90,100]
@@ -100,12 +101,28 @@ def backward_iv_test():
         woe_dict[(t.bins[i], t.bins[i+1])] = woe
     print(woe_dict)
 
+def backward_chi_test():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Age','target']]
+    df = df.dropna()
+
+    t = backwardSplit(df['Age'], df['target'])
+    t.fit(sby='chi',num_split=7)
+    print(t.bins) # [16.  17.5 18.5 85.5 95. ]
+    woe_dict = {}
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        woe_dict[(t.bins[i], t.bins[i+1])] = woe
+    print(woe_dict)
+
+
 
 def main():
     #forward_woe_test()
     #sampleTest()
     #forward_iv_test()
-    backward_iv_test()
+    backward_chi_test()
 
 if __name__ == "__main__":
     main()

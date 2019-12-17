@@ -21,6 +21,7 @@ class trendSplit(simpleMethods):
         self.candidate = []
         self.woe_cache = {}
         self.iv_cache = {}
+        self.chisquare_cache = {}
         self.know_box = {}
 
     def cal_woe_by_range(self,wrange):
@@ -52,7 +53,7 @@ class trendSplit(simpleMethods):
         result = []
         for j in range(len(vrange)-1):
             if (vrange[j], vrange[j+1]) not in self.iv_cache:
-                vvalue = self.value[(self.x <= vrange[j+1]) & (self.x > vrange[j])]
+                vvalue = self.value[(self.x < vrange[j+1]) & (self.x >= vrange[j])]
                 iv_box = self._cal_iv(vvalue)
                 self.iv_cache[(vrange[j], vrange[j+1])] = iv_box
             else:
@@ -64,7 +65,7 @@ class trendSplit(simpleMethods):
 
     def cal_woe_by_start_end(self, start, end):
         if (start, end) not in self.woe_cache:
-            vvalue = self.value[(self.x <= end) & (self.x > start)]
+            vvalue = self.value[(self.x < end) & (self.x >= start)]
             woe_box = self._cal_woe(vvalue)
             self.woe_cache[(start, end)] = woe_box
         else:
@@ -128,3 +129,27 @@ class trendSplit(simpleMethods):
             self.trend = 'down'
         #print(trend_up, trend_down, result)
         return trend_up, trend_down
+
+    def cal_chisquare_by_range(self, chi_range):
+        if chi_range not in self.chisquare_cache:
+            v_up = self.value[(self.x < chi_range[1]) & (self.x >= chi_range[0])]
+            v_down = self.value[(self.x < chi_range[2]) & (self.x >= chi_range[1])]
+            all_num = len(v_up)+len(v_down)
+            up_bad = len(v_up[v_up==self.bad])
+            up_good = len(v_up)-up_bad
+            down_bad = len(v_down[v_down==self.bad])
+            down_good = len(v_down)-down_bad
+            all_g = up_good + down_good
+            all_b = up_bad + down_bad
+
+            if len(v_up)==0 or len(v_down)==0:
+                chisquare_value = 10**7
+            else:
+                chisquare_value = (up_bad-len(v_up)*all_b/all_num)/len(v_up)*all_b/all_num + \
+                     (up_good-len(v_up)*all_g/all_num)/len(v_up)*all_g/all_num + \
+                     (down_good-len(v_down)*all_g/all_num)/len(v_down)*all_g/all_num + \
+                     (down_bad-len(v_down)*all_b/all_num)/len(v_down)*all_b/all_num
+            self.chisquare_cache[chi_range] = chisquare_value
+        else:
+            chisquare_value = self.chisquare_cache[chi_range]
+        return chisquare_value

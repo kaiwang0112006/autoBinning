@@ -69,7 +69,7 @@ class simpleMethods:
         if type(list(self.x)[0]) == type(1):
             self.bins = np.array(list(self.x))
         else:
-            x_sort = sorted(self.x,reverse=False)
+            x_sort = sorted(list(set(self.x)),reverse=False)
             bins = [x_sort[0]]
             for i in range(len(x_sort)-1):
                 bins.append((x_sort[i]+x_sort[i+1])/2)
