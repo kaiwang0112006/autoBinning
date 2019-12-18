@@ -58,12 +58,11 @@ def forward_woe_test():
     t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='woe',num_split=4,init_split=20)
     print(t.bins) # [16. 42. 44. 48. 50. 94.]
-    woe_dict = {}
+    print("bin\twoe")
     for i in range(len(t.bins)-1):
         v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
         woe = t._cal_woe(v)
-        woe_dict[(t.bins[i], t.bins[i+1])] = woe
-    print(woe_dict)
+        print((t.bins[i], t.bins[i+1]),woe)
     # {(16.0, 25.0): 0.11373232830301286, (25.0, 42.0): 0.07217546872710079, (42.0, 50.0): 0.04972042405868509, (50.0, 72.0): -0.07172614369435065, (72.0, 94.0): -0.13778318584223453}
 
 def forward_iv_test():
@@ -79,12 +78,11 @@ def forward_iv_test():
     print(t.bins) # [16. 38. 50. 94.]
     t.fit(sby='woeiv',num_split=4,init_split=20)
     print(t.bins) # [16. 25. 33. 36. 38. 94.]
-    woe_dict = {}
+    print("bin\twoe")
     for i in range(len(t.bins)-1):
         v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
         woe = t._cal_woe(v)
-        woe_dict[(t.bins[i], t.bins[i+1])] = woe
-    print(woe_dict)
+        print((t.bins[i], t.bins[i+1]),woe)
 
 def backward_iv_test():
     df = pd.read_csv('credit_old.csv')
@@ -108,21 +106,22 @@ def backward_chi_test():
 
     t = backwardSplit(df['Age'], df['target'])
     t.fit(sby='chi',num_split=7)
-    print(t.bins) # [16.  17.5 18.5 85.5 95. ]
-    woe_dict = {}
+    print(t.bins) # [16.  72.5 73.5 87.5 89.5 90.5 95. ]
+    print("bin\twoe")
     for i in range(len(t.bins)-1):
         v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
         woe = t._cal_woe(v)
-        woe_dict[(t.bins[i], t.bins[i+1])] = woe
-    print(woe_dict)
+        print((t.bins[i], t.bins[i+1]),woe)
+        #woe_dict[(t.bins[i], t.bins[i+1])] = woe
+
 
 
 
 def main():
     #forward_woe_test()
     #sampleTest()
-    #forward_iv_test()
-    backward_chi_test()
+    forward_iv_test()
+    #backward_chi_test()
 
 if __name__ == "__main__":
     main()
