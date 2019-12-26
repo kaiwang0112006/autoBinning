@@ -85,8 +85,8 @@ class forwardSplit(trendSplit):
                 woe_range = (range_list[canidx-1], range_list[canidx], range_list[canidx+1])
                 iv_range = tuple(range_list)
 
-            if len(self.value[(self.x <= woe_range[1]) & (self.x > woe_range[0])]) > min_sample and \
-                    len(self.value[(self.x <= woe_range[2]) & (self.x > woe_range[1])]) > min_sample:
+            if len(self.value[(self.x < woe_range[1]) & (self.x >= woe_range[0])]) > min_sample and \
+                    len(self.value[(self.x < woe_range[2]) & (self.x >= woe_range[1])]) > min_sample:
                 if sby == 'woe':
                     woe = self.cal_woe_by_range(woe_range)
                     if woe > minv:

@@ -4,6 +4,7 @@ from utils.simpleMethods import *
 from utils.trendDiscretization import *
 from utils.forwardSplit import *
 from utils.backwardSplit import *
+from utils.mapa import *
 import numpy as np
 import pandas as pd
 
@@ -115,13 +116,27 @@ def backward_chi_test():
         #woe_dict[(t.bins[i], t.bins[i+1])] = woe
 
 
+def MAPA_test():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Age','target']]
+    df = df.dropna()
+
+    t = MAPA(df['Age'], df['target'])
+    t.fit(trend='up',sby='woe')
+    print(t.bins)
+    print("bin\twoe")
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        print((t.bins[i], t.bins[i+1]),woe)
 
 
 def main():
     #forward_woe_test()
     #sampleTest()
-    forward_iv_test()
+    #forward_iv_test()
     #backward_chi_test()
+    MAPA_test()
 
 if __name__ == "__main__":
     main()
