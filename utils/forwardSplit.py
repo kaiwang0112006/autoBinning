@@ -34,7 +34,7 @@ class forwardSplit(trendSplit):
         cut, iv = self.find_cut(**param)
         param['iv_base'] = iv
         self.cut_range = [cut]
-        if cut:
+        if cut!=None:
             self.candidate.remove(cut)
             while True:
                 cut, iv = self.find_cut(**param)
