@@ -6,8 +6,8 @@ import math
 
 
 class backwardSplit(trendSplit):
-    def __init__(self, x, y, bad=1):
-        trendSplit.__init__(self, x, y, bad)
+    def __init__(self, x, y, bad=1,missing=None, force=False):
+        trendSplit.__init__(self, x, y, bad, missing, force)
 
     def fit(self, init_split=0, num_split=0, minv=0, sby='iv'):
         '''

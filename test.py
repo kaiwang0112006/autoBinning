@@ -56,6 +56,9 @@ def forward_woe_test():
     t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='woe',minv=0.01,init_split=20)
     print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 44. 46. 48. 50. 52. 54. 55. 58. 60. 63. 72. 94.]
+    t = forwardSplit(df['Age'], df['target'],missing=16)
+    t.fit(sby='woe',num_split=4,init_split=20)
+    print(t.bins)
     t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='woe',num_split=4,init_split=20)
     print(t.bins) # [16. 42. 44. 48. 50. 94.]
@@ -115,6 +118,18 @@ def backward_chi_test():
         print((t.bins[i], t.bins[i+1]),woe)
         #woe_dict[(t.bins[i], t.bins[i+1])] = woe
 
+def forward_iv_test2():
+    df = pd.read_csv('resolution.csv')
+    df = df.dropna()
+
+    t = forwardSplit(df['x'], df['y'],missing=-1)
+    t.fit(sby='woeiv',minv=0.1,init_split=0,num_split=4)
+    print(t.bins)
+    print("bin\twoe")
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        print((t.bins[i], t.bins[i+1]),woe)
 
 def MAPA_test():
     df = pd.read_csv('credit_old.csv')
@@ -133,10 +148,11 @@ def MAPA_test():
 
 def main():
     #forward_woe_test()
+    forward_iv_test2()
     #sampleTest()
     #forward_iv_test()
     #backward_chi_test()
-    MAPA_test()
+    #MAPA_test()
 
 if __name__ == "__main__":
     main()

@@ -6,8 +6,8 @@ import math
 
 
 class trendSplit(simpleMethods):
-    def __init__(self, x, y, bad=1):
-        simpleMethods.__init__(self, x)
+    def __init__(self, x, y, bad=1,missing=None,force=False):
+        simpleMethods.__init__(self, x,  missing=missing,force=force)
         self.y = y
         self.bad=bad
         self.set_init()
@@ -16,6 +16,12 @@ class trendSplit(simpleMethods):
         self.cut_range = []
         self.trend = None
         self.value = np.array(self.y)
+        if self.missing == None:
+            self.value_miss = None
+        else:
+            self.value_miss = self.value[self.x_org == self.missing]
+            self.value = self.value[self.x_org!=self.missing]
+
         self.allbad = len(self.value[self.value == self.bad])  # 好样本总数
         self.allgood = len(self.value) - self.allbad  # 坏样本总数
         self.candidate = []
@@ -82,7 +88,7 @@ class trendSplit(simpleMethods):
         bad_num = len(v[v == self.bad])
         count_num = len(v)
 
-        if count_num-bad_num==0 or self.allgood==0:
+        if count_num-bad_num==0 or self.allgood==0 or bad_num==0:
             woe = 0
         else:
             woe = math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))
@@ -98,7 +104,7 @@ class trendSplit(simpleMethods):
         bad_num = len(v[v == self.bad])
         count_num = len(v)
 
-        if count_num-bad_num == 0 or self.allgood==0:
+        if count_num-bad_num == 0 or self.allgood==0 or bad_num==0:
             iv = 0
         else:
             iv = (bad_num / (count_num - bad_num))*math.log((bad_num / (count_num - bad_num)) / (self.allbad / self.allgood))

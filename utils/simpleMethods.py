@@ -2,11 +2,20 @@
 import numpy as np 
 import pandas as pd
 import math
+import copy
 
 class simpleMethods:
-    def __init__(self,x):
-        self.x = x
+    def __init__(self,x, missing=None,force=False):
+        self.x_org = x
         self.range_dict = {}
+        self.missing=missing
+        if self.missing == None:
+            self.x = copy.deepcopy(self.x_org)
+            self.x_miss = None
+        else:
+            self.x = self.x_org[self.x_org!=self.missing]
+            self.x_miss = self.x_org[self.x_org==self.missing]
+        self.force=force
         
     def equalValue(self,size):
         '''
@@ -15,6 +24,7 @@ class simpleMethods:
         :return:
         '''
         self.range_dict = {}
+
         self.bins = np.linspace(min(self.x), max(self.x), size+1)
 
         for i in range(len(self.bins)-1):
@@ -66,7 +76,7 @@ class simpleMethods:
         最细粒度切分
         :return:
         '''
-        if type(list(self.x)[0]) == type(1):
+        if len(set(self.x))<=10 and not self.force:
             self.bins = np.array(list(self.x))
         else:
             x_sort = sorted(list(set(self.x)),reverse=False)
