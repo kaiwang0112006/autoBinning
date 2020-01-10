@@ -13,7 +13,7 @@ def sampleTest():
     #my_list = [1,1,2,2,2,2,3,3,4,5,6,7,8,9]
     my_list = [1,1,2,2,2,2,3,3,4,5,6,7,8,9,10,10,20,20,20,20,30,30,40,50,60,70,80,90,100]
     my_list_y = [1,1,2,2,2,2,1,1,1,2,2,2,1,1]
-    t = simpleMethods(my_list)
+    t = simpleMethods(my_list) # [  1.           5.33333333  20.         100.        ]
     t.equalSize(3)
     trans = np.digitize(my_list, t.bins)
     print(t.bins)
@@ -148,8 +148,8 @@ def MAPA_test():
 
 def main():
     #forward_woe_test()
-    forward_iv_test2()
-    #sampleTest()
+    #forward_iv_test2()
+    sampleTest()
     #forward_iv_test()
     #backward_chi_test()
     #MAPA_test()

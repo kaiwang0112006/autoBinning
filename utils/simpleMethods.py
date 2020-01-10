@@ -58,9 +58,12 @@ class simpleMethods:
         :return:
         '''
         self.range_dict = {}
-        _, self.bins = pd.qcut(self.x,size,retbins='True',duplicates='drop')
-
-        self.bins = sorted(list(self.bins))
+        # use pandas qcut
+        #_, self.bins = pd.qcut(self.x,size,retbins='True',duplicates='drop')
+        #self.bins = sorted(list(self.bins))
+        # use numpy instead
+        breakpoints = np.arange(0, size + 1) / (size) * 100
+        self.bins = [np.percentile(self.x, b) for b in breakpoints]
 
         for i in range(len(self.bins)-1):
             start = self.bins[i]
