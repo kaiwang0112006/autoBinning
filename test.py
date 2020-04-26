@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from autoBinning.utils.forwardSplit import *
+from autoBinning.utils.trendSplit import *
+from autoBinning.utils.simpleMethods import *
+from autoBinning.utils.trendDiscretization import *
+from autoBinning.utils.mapa import *
 
-from utils.simpleMethods import *
-from utils.trendDiscretization import *
-from utils.forwardSplit import *
-from utils.backwardSplit import *
-from utils.mapa import *
 import numpy as np
 import pandas as pd
 
@@ -145,14 +145,28 @@ def MAPA_test():
         woe = t._cal_woe(v)
         print((t.bins[i], t.bins[i+1]),woe)
 
+def spearman_test():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Age','target']]
+    df = df.dropna()
+
+    t = backwardSplit(df['Age'], df['target'])
+    t.fit_by_spearman(min_v=5, init_split=20)
+    print(t.bins)
+    print("bin\twoe")
+    for i in range(len(t.bins)-1):
+        v = t.value[(t.x < t.bins[i+1]) & (t.x >= t.bins[i])]
+        woe = t._cal_woe(v)
+        print((t.bins[i], t.bins[i+1]),woe)
 
 def main():
     #forward_woe_test()
     #forward_iv_test2()
-    sampleTest()
+    #sampleTest()
     #forward_iv_test()
     #backward_chi_test()
     #MAPA_test()
+    spearman_test()
 
 if __name__ == "__main__":
     main()

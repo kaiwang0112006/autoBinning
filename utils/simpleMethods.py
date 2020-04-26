@@ -53,7 +53,6 @@ class simpleMethods:
     def equalSize(self,size):
         '''
         每个分箱样本数平均
-        self.bins:
         :param size:
         :return:
         '''

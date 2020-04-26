@@ -115,5 +115,10 @@ chi-square value is computed.
     t = backwardSplit(df['Age'], df['target'])
     t.fit(sby='chi',num_split=7)
     print(t.bins) # [16.  72.5 73.5 87.5 89.5 90.5 95. ]
+    
+#### 基于spearman相关性做向后等频分箱
+
+    t = backwardSplit(df['Age'], df['target'])
+    t.fit_by_spearman(min_v=5, init_split=20)
         
     

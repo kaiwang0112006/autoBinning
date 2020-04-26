@@ -3,7 +3,7 @@ from .trendSplit import *
 import numpy as np
 import copy
 import math
-
+from scipy import stats
 
 class backwardSplit(trendSplit):
     def __init__(self, x, y, bad=1,missing=None, force=False):
@@ -84,3 +84,40 @@ class backwardSplit(trendSplit):
                         minv = chi_v
                         cut = self.candidate[i]
         return cut
+
+    def fit_by_spearman(self, init_split=0, min_v=10):
+        '''
+        :param init_split:
+        :param max_v:
+        :return:
+        '''
+        target_dict = None
+        self.set_init()
+        if init_split == 0 or len(self.x) <= init_split:
+            n_split = int(len(self.x)/2)
+        else:
+            n_split = init_split
+
+        while n_split>=min_v:
+            self.equalSize(n_split)
+            x_mean = []
+            y_mean = []
+            for r in self.range_dict:
+                if self.range_dict[r] == max(self.range_dict.values()):
+                    x_mean.append(np.nanmean(self.x[(self.x <= r[1]) & (self.x >= r[0])]))
+                    y_mean.append(np.nanmean(self.value[(self.x <= r[1]) & (self.x >= r[0])]))
+                else:
+                    x_mean.append(np.nanmean(self.x[(self.x < r[1]) & (self.x >= r[0])]))
+                    y_mean.append(np.nanmean(self.value[(self.x < r[1]) & (self.x >= r[0])]))
+
+            #print(stats.spearmanr(x_mean, y_mean))
+            if abs(stats.spearmanr(x_mean, y_mean)[0]) > 0.999:
+                target_dict = self.range_dict
+            n_split -= 1
+
+        candidate = []
+        for r in target_dict:
+            candidate.append(r[0])
+            candidate.append(r[1])
+        self.candidate = sorted(list(set(candidate)))
+        self.bins = np.array(sorted(list(set(self.candidate))))
