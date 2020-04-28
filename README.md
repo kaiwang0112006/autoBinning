@@ -6,6 +6,7 @@
 
 ## 基础工具 (simpleMethods)
 
+    from autoBinning.utils.simpleMethods import *
     my_list = [1,1,2,2,2,2,3,3,4,5,6,7,8,9,10,10,20,20,20,20,30,30,40,50,60,70,80,90,100]
     my_list_y = [1,1,2,2,2,2,1,1,1,2,2,2,1,1]
     t = simpleMethods(my_list)
@@ -24,6 +25,7 @@
 ### 向前迭代方法 (forward method)
 
     # load data
+    import pandas as pd
     df = pd.read_csv('credit_old.csv')
     df = df[['Age','target']]
     df = df.dropna()
@@ -32,6 +34,7 @@
 
 在得到尽可能细粒度的细分箱之后，寻找上下分箱woe差异最大的初始切割点，并得到woe趋势，之后迭代找到下一个woe差异最大且趋势相同的切割点，直到满足woe差异不大于一个阈值或分箱数（切割点数）满足要求
 
+    from autoBinning.utils.forwardSplit import *
     t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='woe',minv=0.01,init_split=20)
     print(t.bins) # [16. 25. 29. 33. 36. 38. 40. 42. 44. 46. 48. 50. 52. 54. 55. 58. 60. 63. 72. 94.]
@@ -58,6 +61,7 @@
 
 与最大woe分裂分箱方法类似，在得到尽可能细粒度的细分箱之后，寻找iv值最大的切割点，并得到woe趋势，之后迭代找到下一个iv最大且woe趋势相同的切割点，直到分箱数（切割点数）满足要求
 
+    from autoBinning.utils.forwardSplit import *
     # sby='woeiv'时考虑woe趋势，sby='iv'时不考虑woe趋势
     t = forwardSplit(df['Age'], df['target'])
     t.fit(sby='iv',minv=0.1,init_split=20)
@@ -87,6 +91,7 @@
 
 迭代每次删除一个分箱切点，是去掉后整体iv最大
 
+    from autoBinning.utils.backwardSplit import *
     t = backwardSplit(df['Age'], df['target'])
     t.fit(sby='iv',num_split=5)
     print(t.bins) # [16.  17.5 18.5 85.5 95. ]
@@ -112,12 +117,14 @@ chi-square value is computed.
 
 4\. Repeat 1 and 2 until number of bins meets predefined threshold.
 
+    from autoBinning.utils.backwardSplit import *
     t = backwardSplit(df['Age'], df['target'])
     t.fit(sby='chi',num_split=7)
     print(t.bins) # [16.  72.5 73.5 87.5 89.5 90.5 95. ]
     
 #### 基于spearman相关性做向后等频分箱
 
+    from autoBinning.utils.backwardSplit import *
     t = backwardSplit(df['Age'], df['target'])
     t.fit_by_spearman(min_v=5, init_split=20)
         
