@@ -159,6 +159,34 @@ def spearman_test():
         woe = t._cal_woe(v)
         print((t.bins[i], t.bins[i+1]),woe)
 
+def forward_woe_test_cat():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Branch','target']]
+    df = df.dropna()
+
+    t = forwardSplit(df['Branch'], df['target'],categorical=True)
+    t.fit(sby='woe',minv=0.01,init_split=0,num_split=4)
+    print(t.bins)
+    for i in range(len(t.bins)):
+        v = t.value[np.isin(t.x_idx,t.bins[i])]
+        woe = t._cal_woe(v)
+        print(t.bins[i],woe)
+
+def forward_iv_test2_cat():
+    df = pd.read_csv('credit_old.csv')
+    df = df[['Branch','target']]
+    df = df.dropna()
+
+    t = forwardSplit(df['Branch'], df['target'],missing=-1,categorical=True)
+    t.fit(sby='woeiv',minv=0,init_split=0,num_split=4)
+    print(t.bins)
+    print("bin\twoe")
+    for i in range(len(t.bins)):
+        v = t.value[np.isin(t.x_idx,t.bins[i])]
+        woe = t._cal_woe(v)
+        print(t.bins[i],woe)
+
+
 def main():
     #forward_woe_test()
     #forward_iv_test2()
@@ -166,7 +194,8 @@ def main():
     #forward_iv_test()
     #backward_chi_test()
     #MAPA_test()
-    spearman_test()
+    #spearman_test()
+    forward_iv_test2_cat()
 
 if __name__ == "__main__":
     main()

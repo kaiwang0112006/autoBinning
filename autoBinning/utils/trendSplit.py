@@ -6,16 +6,31 @@ import math
 
 
 class trendSplit(simpleMethods):
-    def __init__(self, x, y, bad=1,missing=None,force=False):
-        simpleMethods.__init__(self, x,  missing=missing,force=force)
+    def __init__(self, x, y, bad=1,missing=None,force=False, categorical=False):
+        simpleMethods.__init__(self, x,  missing=missing,force=force, categorical=categorical)
         self.y = y
+        self.xmap = {}
+        self.categorical = categorical
         self.bad=bad
-        self.set_init()
+        self.set_init(categorical=categorical)
 
-    def set_init(self):
+    def set_init(self, categorical=False):
         self.cut_range = []
         self.trend = None
         self.value = np.array(self.y)
+
+        if categorical:
+            xset = set(self.x)
+            vmap = {}
+            for v in xset:
+                v_filter = self.value[self.x_org == v]
+                vmap[v] = len(v_filter[v_filter==self.bad])/len(v_filter)
+            v_sort = sorted(list(vmap.keys()), key=lambda x: vmap[x], reverse=True)
+            self.xmap = dict(zip(v_sort, range(len(v_sort))))
+            self.xmap_inverse = dict(zip(range(len(v_sort)),v_sort))
+            self.x_idx = copy.deepcopy(self.x)
+            self.x = np.array([self.xmap[i] for i in list(self.x)])
+
         if self.missing == None:
             self.value_miss = None
         else:
@@ -29,6 +44,7 @@ class trendSplit(simpleMethods):
         self.iv_cache = {}
         self.chisquare_cache = {}
         self.know_box = {}
+
 
     def cal_woe_by_range(self,wrange):
         '''
@@ -111,7 +127,7 @@ class trendSplit(simpleMethods):
         return iv
 
     def candidateTrend(self,cut_range):
-        #print(cut_range)
+
         trend_up = 0
         trend_down = 0
         result = {}
@@ -119,6 +135,7 @@ class trendSplit(simpleMethods):
             candidate_list = copy.deepcopy(self.candidate)
         else:
             candidate_list = [self.candidate[0]] + copy.deepcopy(cut_range) + [self.candidate[-1]]
+
         for i in range(1,len(candidate_list) - 1):
             woe_up = self.cal_woe_by_start_end(candidate_list[i-1], candidate_list[i])
             woe_down = self.cal_woe_by_start_end(candidate_list[i], candidate_list[i+1])
@@ -133,7 +150,7 @@ class trendSplit(simpleMethods):
             self.trend = 'up'
         elif trend_up<trend_down:
             self.trend = 'down'
-        #print(trend_up, trend_down, result)
+
         return trend_up, trend_down
 
     def cal_chisquare_by_range(self, chi_range):

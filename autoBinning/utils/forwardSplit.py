@@ -6,8 +6,8 @@ import math
 
 
 class forwardSplit(trendSplit):
-    def __init__(self, x, y, bad=1,missing=None, force=False):
-        trendSplit.__init__(self, x, y, bad, missing, force)
+    def __init__(self, x, y, bad=1,missing=None, force=False, categorical=False):
+        trendSplit.__init__(self, x, y, bad, missing, force, categorical=categorical)
 
     def fit(self, init_split=0, num_split=0, minv=0, sby='woe', min_sample=0):
         '''
@@ -19,7 +19,7 @@ class forwardSplit(trendSplit):
         '''
         self.set_init()
 
-        if init_split == 0 or len(self.x) <= init_split:
+        if init_split == 0 or len(self.x) <= init_split or self.categorical:
             self.everysplit()
         else:
             self.equalSize(init_split)
@@ -52,7 +52,19 @@ class forwardSplit(trendSplit):
 
             self.cut_range.append(self.candidate[0])
             self.cut_range.append(self.candidate[-1])
-            self.bins = np.array(sorted(list(set(self.cut_range))))
+            self.bins = sorted(list(set(self.cut_range)))
+            if self.categorical:
+                binslist = list(self.bins)
+                binsvalue = []
+                for i in range(len(binslist)-1):
+                    v = []
+                    for k in self.xmap:
+                        if self.xmap[k]>=binslist[i] and self.xmap[k]<binslist[i+1]:
+                            v.append(k)
+                    binsvalue.append(v)
+                self.bins = copy.deepcopy(binsvalue)
+            else:
+                self.bins = np.array(self.bins)
         else:
             self.cut_range = None
             self.bins = None
@@ -74,6 +86,7 @@ class forwardSplit(trendSplit):
 
         cut = None
         result = {}
+
         for i in range(1, len(self.candidate) - 1):
             if len(self.cut_range) == 0:
                 woe_range = (self.candidate[0]-0.1, self.candidate[i], self.candidate[-1])

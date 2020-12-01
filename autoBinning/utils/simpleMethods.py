@@ -5,10 +5,11 @@ import math
 import copy
 
 class simpleMethods:
-    def __init__(self,x, missing=None,force=False):
+    def __init__(self,x, missing=None,force=False, categorical=False):
         self.x_org = x
         self.range_dict = {}
         self.missing=missing
+        self.categorical = categorical
         if self.missing == None:
             self.x = copy.deepcopy(self.x_org)
             self.x_miss = None
@@ -78,8 +79,10 @@ class simpleMethods:
         最细粒度切分
         :return:
         '''
-        if len(set(self.x))<=10 and not self.force:
-            self.bins = np.array(list(self.x))
+        if (len(set(self.x))<=10 and not self.force) or self.categorical:
+            self.bins = sorted(list(set(self.x)))
+            self.bins.append(max(self.bins)+1)
+            self.bins = np.array(self.bins)
         else:
             x_sort = sorted(list(set(self.x)),reverse=False)
             bins = [x_sort[0]]
